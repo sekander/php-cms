@@ -1,4 +1,11 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+?>
+
+
+<?php
 
 include( 'includes/database.php' );
 include( 'includes/config.php' );
@@ -10,7 +17,7 @@ if( isset( $_GET['delete'] ) )
 {
   
   $query = 'DELETE FROM users
-    WHERE id = '.$_GET['delete'].'
+    WHERE user_id = '.$_GET['delete'].'
     LIMIT 1';
   mysqli_query( $connect, $query );
   
@@ -23,10 +30,16 @@ if( isset( $_GET['delete'] ) )
 
 include( 'includes/header.php' );
 
+// $query = 'SELECT *
+  // -- FROM users 
+  // -- '.( ( $_SESSION['id'] != 1 and $_SESSION['id'] != 4 ) ? 'WHERE user_id = '.$_SESSION['id'].' ' : '' ).'
+  // ORDER BY email';
+
 $query = 'SELECT *
   FROM users 
-  '.( ( $_SESSION['id'] != 1 and $_SESSION['id'] != 4 ) ? 'WHERE id = '.$_SESSION['id'].' ' : '' ).'
-  ORDER BY last,first';
+  WHERE role != "admin"
+  ORDER BY email';
+  
 $result = mysqli_query( $connect, $query );
 
 ?>
@@ -44,17 +57,17 @@ $result = mysqli_query( $connect, $query );
   </tr>
   <?php while( $record = mysqli_fetch_assoc( $result ) ): ?>
     <tr>
-      <td align="center"><?php echo $record['id']; ?></td>
-      <td align="left"><?php echo htmlentities( $record['first'] ); ?> <?php echo htmlentities( $record['last'] ); ?></td>
+      <td align="center"><?php echo $record['user_id']; ?></td>
+      <!-- <td align="left"><?php echo htmlentities( $record['first'] ); ?> <?php echo htmlentities( $record['last'] ); ?></td> -->
       <td align="left"><a href="mailto:<?php echo htmlentities( $record['email'] ); ?>"><?php echo htmlentities( $record['email'] ); ?></a></td>
-      <td align="center"><a href="users_edit.php?id=<?php echo $record['id']; ?>">Edit</a></td>
+      <td align="center"><a href="users_edit.php?id=<?php echo $record['user_id']; ?>">Edit</a></td>
       <td align="center">
-        <?php if( $_SESSION['id'] != $record['id'] ): ?>
-          <a href="users.php?delete=<?php echo $record['id']; ?>" onclick="javascript:confirm('Are you sure you want to delete this user?');">Delete</a>
+        <?php if( $_SESSION['id'] != $record['user_id'] ): ?>
+          <a href="users.php?delete=<?php echo $record['user_id']; ?>" onclick="javascript:confirm('Are you sure you want to delete this user?');">Delete</a>
         <?php endif; ?>
       </td>
       <td align="center">
-        <?php echo $record['active']; ?>
+        <?php echo $record['role']; ?>
       </td>
     </tr>
   <?php endwhile; ?>
