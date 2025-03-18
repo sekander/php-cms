@@ -28,6 +28,14 @@ include( './admin/includes/functions.php' );
 <body>
 
   <h1>Welcome to My Website!</h1>
+  
+  <?php if(isset($_SESSION['id'])): ?>
+    <p><a href="admin/dashboard.php">Go to Artist Dashboard</a></p>
+  <?php else: ?>
+    <p><a href="admin/index.php">Artist Login</a></p>
+  <?php endif; ?>
+
+
   <p>This is the website frontend!</p>
 
   <?php

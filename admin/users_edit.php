@@ -24,7 +24,8 @@ if( isset( $_POST['first'] ) )
       first = "'.mysqli_real_escape_string( $connect, $_POST['first'] ).'",
       last = "'.mysqli_real_escape_string( $connect, $_POST['last'] ).'",
       email = "'.mysqli_real_escape_string( $connect, $_POST['email'] ).'",
-      active = "'.$_POST['active'].'"
+      active = "'.$_POST['active'].'",
+      role = "'.$_POST['role'].'"
       WHERE id = '.$_GET['id'].'
       LIMIT 1';
     mysqli_query( $connect, $query );
@@ -114,6 +115,23 @@ include( 'includes/header.php' );
   echo '</select>';
   
   ?>
+
+  <br>
+      
+      <label for="role">Role:</label>
+      <?php
+        
+      $roles = array( 'user', 'artist' );
+        
+      echo '<select name="role" id="role">';
+      foreach( $roles as $role )
+      {
+        echo '<option value="'.$role.'"';
+        echo '>'.$role.'</option>';
+      }
+      echo '</select>';
+        
+      ?>
   
   <br>
   
