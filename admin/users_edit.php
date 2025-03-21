@@ -1,4 +1,8 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+?>
+<?php
 
 include( 'includes/database.php' );
 include( 'includes/config.php' );
@@ -14,18 +18,17 @@ if( !isset( $_GET['id'] ) )
   
 }
 
-if( isset( $_POST['first'] ) )
+if( isset( $_POST['username'] ) )
 {
   
-  if( $_POST['first'] and $_POST['last'] and $_POST['email'] )
+  if( $_POST['username'] && $_POST['email'] && $_POST['role'])
   {
     
     $query = 'UPDATE users SET
-      first = "'.mysqli_real_escape_string( $connect, $_POST['first'] ).'",
-      last = "'.mysqli_real_escape_string( $connect, $_POST['last'] ).'",
+      username = "'.mysqli_real_escape_string( $connect, $_POST['username'] ).'",
       email = "'.mysqli_real_escape_string( $connect, $_POST['email'] ).'",
-      active = "'.$_POST['active'].'"
-      WHERE id = '.$_GET['id'].'
+      role = "'.mysqli_real_escape_string( $connect, $_POST['role'] ).'"
+      WHERE user_id = '.$_GET['id'].'
       LIMIT 1';
     mysqli_query( $connect, $query );
     
@@ -33,8 +36,8 @@ if( isset( $_POST['first'] ) )
     {
       
       $query = 'UPDATE users SET
-        password = "'.md5( $_POST['password'] ).'"
-        WHERE id = '.$_GET['id'].'
+        password_hash = "'.hash('sha256', $_POST['password']).'"
+        WHERE user_id = '.$_GET['id'].'
         LIMIT 1';
       mysqli_query( $connect, $query );
       
@@ -55,7 +58,7 @@ if( isset( $_GET['id'] ) )
   
   $query = 'SELECT *
     FROM users
-    WHERE id = '.$_GET['id'].'
+    WHERE user_id = '.$_GET['id'].'
     LIMIT 1';
   $result = mysqli_query( $connect, $query );
   
@@ -79,13 +82,8 @@ include( 'includes/header.php' );
 
 <form method="post">
   
-  <label for="first">First:</label>
-  <input type="text" name="first" id="first" value="<?php echo htmlentities( $record['first'] ); ?>">
-  
-  <br>
-  
-  <label for="last">Last:</label>
-  <input type="text" name="last" id="last" value="<?php echo htmlentities( $record['last'] ); ?>">
+  <label for="username">Username:</label>
+  <input type="text" name="username" id="username" value="<?php echo htmlentities( $record['username'] ); ?>">
   
   <br>
   
@@ -99,22 +97,17 @@ include( 'includes/header.php' );
   
   <br>
   
+  <label for="role">Role:</label>
+  <select name="role" id="role" required>
+    <option value="artist">Artist</option>
+    <option value="admin">Admin</option>
+    <option value="user">User</option>
+    <!-- You can add more roles as needed -->
+  </select>
+  
+  <br>
+  
   <label for="active">Active:</label>
-  <?php
-  
-  $values = array( 'Yes', 'No' );
-  
-  echo '<select name="active" id="active">';
-  foreach( $values as $key => $value )
-  {
-    echo '<option value="'.$value.'"';
-    if( $value == $record['active'] ) echo ' selected="selected"';
-    echo '>'.$value.'</option>';
-  }
-  echo '</select>';
-  
-  ?>
-  
   <br>
   
   <input type="submit" value="Edit User">

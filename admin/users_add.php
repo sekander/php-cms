@@ -1,92 +1,87 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-include( 'includes/database.php' );
-include( 'includes/config.php' );
-include( 'includes/functions.php' );
+include('includes/database.php');
+include('includes/config.php');
+include('includes/functions.php');
 
 secure();
 
-if( isset( $_POST['first'] ) )
-{
+if (isset($_POST['username'])) {
   
-  if( $_POST['first'] and $_POST['last'] and $_POST['email'] and $_POST['password'] )
-  {
-    
-    $query = 'INSERT INTO users (
-        first,
-        last,
-        email,
-        password,
-        active
-      ) VALUES (
-        "'.mysqli_real_escape_string( $connect, $_POST['first'] ).'",
-        "'.mysqli_real_escape_string( $connect, $_POST['last'] ).'",
-        "'.mysqli_real_escape_string( $connect, $_POST['email'] ).'",
-        "'.md5( $_POST['password'] ).'",
-        "'.$_POST['active'].'"
-      )';
-    mysqli_query( $connect, $query );
-    
-    set_message( 'User has been added' );
-    
+  if ($_POST['username'] && $_POST['email'] && $_POST['password'] && $_POST['role']) {
+
+    // Use prepared statements to prevent SQL injection
+    $query = 'INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)';
+
+    // Prepare statement
+    if ($stmt = mysqli_prepare($connect, $query)) {
+
+      // Hash the password
+      $password_hash = hash('sha256', $_POST['password']);
+      
+      // Bind parameters
+      mysqli_stmt_bind_param($stmt, "ssss", $_POST['username'], $_POST['email'], $password_hash, $_POST['role']);
+
+      // Execute query
+      if (mysqli_stmt_execute($stmt)) {
+        set_message('User has been added');
+      } else {
+        // Error executing query
+        set_message('Error: ' . mysqli_error($connect));
+      }
+
+      // Close statement
+      mysqli_stmt_close($stmt);
+    } else {
+      set_message('Error preparing query: ' . mysqli_error($connect));
+    }
+
+  } else {
+    set_message('All fields are required');
   }
 
-  /*
-  // Example of debugging a query
-  print_r($_POST);
-  print_r($query);
-  die();
-  */
+  // Debugging: Check if POST variables and query are as expected
+  // print_r($_POST);
+  // die();
 
-  header( 'Location: users.php' );
+  header('Location: users.php');
   die();
-  
 }
 
-include( 'includes/header.php' );
-
+include('includes/header.php');
 ?>
 
 <h2>Add User</h2>
 
 <form method="post">
   
-  <label for="first">First Name:</label>
-  <input type="text" name="first" id="first">
-  
-  <br>
-  
-  <label for="last">Last Name:</label>
-  <input type="text" name="last" id="last">
+  <label for="username">Username:</label>
+  <input type="text" name="username" id="username" required>
   
   <br>
   
   <label for="email">Email:</label>
-  <input type="email" name="email" id="email">
+  <input type="email" name="email" id="email" required>
   
   <br>
   
   <label for="password">Password:</label>
-  <input type="password" name="password" id="password">
+  <input type="password" name="password" id="password" required>
   
   <br>
   
-  <label for="active">Active:</label>
-  <?php
-  
-  $values = array( 'Yes', 'No' );
-  
-  echo '<select name="active" id="active">';
-  foreach( $values as $key => $value )
-  {
-    echo '<option value="'.$value.'"';
-    echo '>'.$value.'</option>';
-  }
-  echo '</select>';
-  
-  ?>
+  <label for="role">Role:</label>
+  <select name="role" id="role" required>
+    <option value="artist">Artist</option>
+    <option value="admin">Admin</option>
+    <option value="user">User</option>
+    <!-- You can add more roles as needed -->
+  </select>
   
   <br>
+  
   
   <input type="submit" value="Add User">
   
@@ -94,9 +89,7 @@ include( 'includes/header.php' );
 
 <p><a href="users.php"><i class="fas fa-arrow-circle-left"></i> Return to User List</a></p>
 
-
 <?php
 
-include( 'includes/footer.php' );
-
+include('includes/footer.php');
 ?>
