@@ -37,9 +37,9 @@ if( isset( $_FILES['photo'] ) )
           break;      
       }
 
-      $query = 'UPDATE projects SET
-        photo = "data:image/'.$type.';base64,'.base64_encode( file_get_contents( $_FILES['photo']['tmp_name'] ) ).'"
-        WHERE id = '.$_GET['id'].'
+      $query = 'UPDATE artworks SET
+        image_url = "data:image/'.$type.';base64,'.base64_encode(file_get_contents($_FILES['photo']['tmp_name'])).'"
+        WHERE artwork_id = '.$_GET['id'].'
         LIMIT 1';
       mysqli_query( $connect, $query );
 
@@ -75,8 +75,8 @@ if( isset( $_GET['id'] ) )
   }
   
   $query = 'SELECT *
-    FROM projects
-    WHERE id = '.$_GET['id'].'
+    FROM artworks
+    WHERE artwork_id = '.$_GET['id'].'
     LIMIT 1';
   $result = mysqli_query( $connect, $query );
   

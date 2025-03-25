@@ -2,8 +2,8 @@
 
 $connect = mysqli_connect( 
     "localhost", // Host
-    "fnky", // Username
-    "454732", // Password
+    "root", // Username
+    "root", // Password
     "national_gallery" // Database
 );
 
