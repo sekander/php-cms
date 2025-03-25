@@ -12,19 +12,19 @@ if( isset( $_POST['title'] ) )
   if( $_POST['title'] and $_POST['content'] )
   {
     
-    $query = 'INSERT INTO projects (
-        title,
-        content,
-        date,
-        type,
-        url
-      ) VALUES (
-         "'.mysqli_real_escape_string( $connect, $_POST['title'] ).'",
-         "'.mysqli_real_escape_string( $connect, $_POST['content'] ).'",
-         "'.mysqli_real_escape_string( $connect, $_POST['date'] ).'",
-         "'.mysqli_real_escape_string( $connect, $_POST['type'] ).'",
-         "'.mysqli_real_escape_string( $connect, $_POST['url'] ).'"
-      )';
+    $query = 'INSERT INTO artworks (
+      artist_id,
+      title,
+      description,
+      image_url,
+      created_at
+    ) VALUES (
+       "'.$_SESSION['id'].'",
+       "'.mysqli_real_escape_string( $connect, $_POST['title'] ).'",
+       "'.mysqli_real_escape_string( $connect, $_POST['content'] ).'",
+       "'.mysqli_real_escape_string( $connect, $_POST['url'] ).'",
+       NOW()
+    )';
     mysqli_query( $connect, $query );
     
     set_message( 'Project has been added' );
