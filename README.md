@@ -1,26 +1,70 @@
-# A Basic Vanilla PHP CMS
+# 🖼️ Art Explorer CMS
 
-This repository is a simple PHP CMS meant to be used as a starting point. The code consists of a simple login process, a dashboard, a place to view/add/edit/delete users, and a place to view/add/edit/delete projects. In an effort to keep the PHP code focused and basic, only the absolute basics have been included. The whole CMS only consists of HTML, PHP, and SQL.
+A PHP-based Content Management System inspired by the [National Gallery of Art Open Access Dataset](https://github.com/NationalGalleryOfArt/opendata), designed to allow users to explore, manage, and present artworks and artists through a custom frontend and admin backend.
 
-A few notes regarding the CMS:
+---
 
-- There is no form validation
-- Security is very basic
-- Image uploading is done through a separate page using a basic servers-side script
-- Images are stored in the database as a base64 string
-- Image resizing is done through [WideImage](http://wideimage.sourceforge.net/) (you'll need to add this to the includes folder)
+## 🚀 Project Overview
 
-> Full tutorial URL:  
-> https://codeadam.ca/learning/php-cms.html
+This CMS was built as part of a web development assignment focused on PHP, MySQL, and dynamic content integration. The system includes:
 
-***
+- A fully customized admin dashboard
+- Frontend website displaying content from the CMS
+- Data modeled after real-world museum collections
 
-## Repo Resources
+---
 
-* [Visual Studio Code](https://code.visualstudio.com/) or [Brackets](http://brackets.io/) (or any code editor)
-* [Filezilla](https://filezilla-project.org/) (or any FTP program)
+## 🔧 Features
 
-<br>
-<a href="https://codeadam.ca">
-<img src="https://cdn.codeadam.ca/images@1.0.0/codeadam-logo-coloured-horizontal.png" width="200">
-</a>
+### ✅ Frontend
+- Responsive layout with **Bootstrap 5**
+- Featured artwork gallery with image previews
+- Artist and period filtering
+- Artwork detail pages
+- Scroll-based animations using **Animate.css**
+- Newsletter subscription form
+
+### ✅ Backend (Admin)
+- Secure login system
+- Admin dashboard UI
+- CRUD functionality:
+  - Artworks (title, image, artist, description, period)
+  - Artists (bio, nationality, birth/death years)
+- Foreign key relationships for data integrity
+- Branded UI and custom styles
+
+---
+
+## 🗃️ Technologies Used
+
+- PHP (Procedural)
+- MySQL
+- Bootstrap 5
+- jQuery
+- Font Awesome
+- Animate.css
+- CKEditor (optional)
+- MAMP/XAMPP for local development
+
+---
+
+## 🔐 Admin Credentials (Sample)
+
+> **URL:** `http://localhost/PHP-CMS/admin/login.php`  
+> **Username:** `admin`  
+> **Password:** `admin123`  
+> *(Replace before production use)*
+
+---
+
+## 🖼️ Data Model
+
+The artwork and artist structures were inspired by the [National Gallery of Art’s Open Access dataset](https://github.com/NationalGalleryOfArt/opendata), including:
+
+- Title
+- Artist name
+- Creation date
+- Medium and dimensions
+- Image URL
+
+---
