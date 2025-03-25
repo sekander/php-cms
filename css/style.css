@@ -1,0 +1,278 @@
+/* Variables */
+:root {
+    --primary-color: #d63384;
+    --dark-color: #212529;
+    --light-color: #f8f9fa;
+    --transition-speed: 0.3s;
+  }
+  
+  /* General Styles */
+  body {
+    font-family: 'Raleway', sans-serif;
+    color: #333;
+    background-color: #fff;
+    line-height: 1.6;
+  }
+  
+  /* Navbar */
+  .navbar {
+    background-color: rgba(0, 0, 0, 0.9) !important;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .navbar .nav-link {
+    color: white !important;
+    position: relative;
+    padding: 5px 10px;
+  }
+  
+  .navbar .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 10px;
+    width: 0;
+    height: 2px;
+    background-color: var(--primary-color);
+    transition: width var(--transition-speed) ease;
+  }
+  
+  .navbar .nav-link:hover::after {
+    width: calc(100% - 20px);
+  }
+  
+  .navbar.scrolled {
+    background-color: white !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .navbar.scrolled .nav-link {
+    color: var(--dark-color) !important;
+  }
+  
+  .navbar.scrolled .nav-link::after {
+    background-color: var(--primary-color);
+  }
+  
+  /* Scroll Indicator */
+  .scroll-indicator {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 4px;
+    background: var(--primary-color);
+    z-index: 1000;
+    transition: width 0.1s;
+  }
+  
+  /* Content Section Animations */
+  .content-section {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  
+  .content-section.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  /* Hero Section */
+  .hero-section {
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://img.freepik.com/free-photo/rendering-inspirational-mood-board_23-2150975964.jpg?t=st=1742862171~exp=1742865771~hmac=eaabda60f82a19927b6158223c97f116ed0eb44c09e6208fceae94185cd7257d&w=826') center/cover;
+    color: var(--light-color);
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    padding: 120px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('https://img.freepik.com/free-photo/rendering-inspirational-mood-board_23-2150975964.jpg?t=st=1742862171~exp=1742865771~hmac=eaabda60f82a19927b6158223c97f116ed0eb44c09e6208fceae94185cd7257d&w=826') center/cover;
+    opacity: 0.2;
+    z-index: 0;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+}
+  
+  /* Features Section */
+  .feature-card {
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .feature-icon {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+  }
+  
+  /* Footer */
+  footer {
+    background-color: #212529;
+    color: #fff;
+  }
+  
+  footer h5, footer h3 {
+    font-family: 'Playfair Display', serif;
+  }
+  
+  footer a {
+    color: #ccc;
+    text-decoration: none;
+  }
+  
+  footer a:hover {
+    color: #fff;
+  }
+  
+
+  /* Additional styles for navbar and micro-interactions */
+  .navbar {
+      background-color: rgba(0, 0, 0, 0.9) !important;
+  }
+  
+  .navbar .nav-link {
+      color: white !important;
+      position: relative;
+      padding: 5px 10px;
+  }
+  
+  .navbar .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 10px;
+      width: 0;
+      height: 2px;
+      background-color: var(--primary-color);
+      transition: width 0.3s ease;
+  }
+  
+  .navbar .nav-link:hover::after {
+      width: calc(100% - 20px);
+  }
+  
+  .navbar.scrolled {
+      background-color: white !important;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+  
+  .navbar.scrolled .nav-link {
+      color: var(--dark-color) !important;
+  }
+  
+  .navbar.scrolled .nav-link::after {
+      background-color: var(--primary-color);
+  }
+  
+  /* Scroll indicator */
+  .scroll-indicator {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      background: var(--primary-color);
+      z-index: 1000;
+      transition: width 0.1s;
+  }
+  
+  /* Content entry animation */
+  .content-section {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  
+  .content-section.visible {
+      opacity: 1;
+      transform: translateY(0);
+  }
+
+  /* Project Cards */
+.project-card {
+    transition: all var(--transition-speed) ease;
+    border: none;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.project-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.project-image-container {
+    position: relative;
+    overflow: hidden;
+    padding-top: 60%; /* 3:2 aspect ratio */
+}
+
+.project-image-container img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.project-card:hover .project-image-container img {
+    transform: scale(1.05);
+}
+
+.project-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding: 1rem;
+    opacity: 0;
+    transition: opacity var(--transition-speed) ease;
+}
+
+.project-card:hover .project-overlay {
+    opacity: 1;
+}
+
+/* Filter Form */
+.filter-form .form-select {
+    width: auto;
+    min-width: 150px;
+}
+
+@media (max-width: 768px) {
+    .filter-form .input-group {
+        flex-wrap: wrap;
+    }
+    .filter-form .form-control,
+    .filter-form .form-select {
+        margin-bottom: 10px;
+        width: 100% !important;
+    }
+    
+    .project-image-container {
+        padding-top: 75%; /* More square on mobile */
+    }
+}
