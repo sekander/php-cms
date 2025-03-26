@@ -1,169 +1,189 @@
-<?php include '../includes/header.php'; ?>
+<?php include('../includes/header.php'); ?>
 
-<!-- Collection Page Content -->
-<section class="py-5">
-    <div class="container">
-        <div class="row mb-5">
-            <div class="col-12 text-center">
-                <h1 class="display-4">Project Portfolio</h1>
-                <p class="lead">Browse our collection of creative projects</p>
-            </div>
-        </div>
+<?php
+// Capture filters from URL
+$search = $_GET['search'] ?? '';
+$sort = $_GET['sort'] ?? 'newest';
+$artist_filter = $_GET['artist'] ?? '';
+$media_filter = $_GET['media'] ?? '';
+$page = $_GET['page'] ?? 1;
+$per_page = 6;
+$offset = ($page - 1) * $per_page;
 
-        <!-- Search and Filter Section -->
-        <div class="row mb-4">
-            <div class="col-md-8 mx-auto">
-                <form action="collection.php" method="get" class="filter-form">
-                    <div class="input-group">
-                        <input type="text" name="search" class="form-control" placeholder="Search projects..." 
-                               value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
-                        <select name="type" class="form-select">
-                            <option value="">All Types</option>
-                            <option value="Website" <?= (isset($_GET['type']) && $_GET['type'] == 'Website') ? 'selected' : '' ?>>Website</option>
-                            <option value="Graphic Design" <?= (isset($_GET['type']) && $_GET['type'] == 'Graphic Design') ? 'selected' : '' ?>>Graphic Design</option>
-                        </select>
-                        <select name="sort" class="form-select">
-                            <option value="newest" <?= (isset($_GET['sort']) && $_GET['sort'] == 'newest') ? 'selected' : '' ?>>Newest First</option>
-                            <option value="oldest" <?= (isset($_GET['sort']) && $_GET['sort'] == 'oldest') ? 'selected' : '' ?>>Oldest First</option>
-                            <option value="title_asc" <?= (isset($_GET['sort']) && $_GET['sort'] == 'title_asc') ? 'selected' : '' ?>>Title (A-Z)</option>
-                            <option value="title_desc" <?= (isset($_GET['sort']) && $_GET['sort'] == 'title_desc') ? 'selected' : '' ?>>Title (Z-A)</option>
-                        </select>
-                        <button type="submit" class="btn btn-primary">Filter</button>
-                        <a href="collection.php" class="btn btn-outline-secondary">Reset</a>
-                    </div>
-                </form>
-            </div>
-        </div>
+// Build base query
+$conditions = [];
+if (!empty($search)) {
+    $search_safe = mysqli_real_escape_string($connect, $search);
+    $conditions[] = "(artworks.title LIKE '%$search_safe%' OR artists.preferred_display_name LIKE '%$search_safe%')";
+}
+if (!empty($artist_filter)) {
+    $artist_safe = mysqli_real_escape_string($connect, $artist_filter);
+    $conditions[] = "artists.artist_id = '$artist_safe'";
+}
+if (!empty($media_filter)) {
+    $media_safe = mysqli_real_escape_string($connect, $media_filter);
+    $conditions[] = "EXISTS (
+        SELECT 1 FROM national_gallery.artwork_media 
+        WHERE artwork_media.artwork_id = artworks.artwork_id 
+        AND media_type = '$media_safe'
+    )";
+}
 
-        <!-- Projects Grid -->
-        <div class="row">
-            <?php
-            // Build the base query
-            $query = "SELECT * FROM projects WHERE 1=1";
-            $params = [];
+// Final SQL query
+$where_sql = count($conditions) ? 'WHERE ' . implode(' AND ', $conditions) : '';
+$order_sql = $sort === 'az' ? 'ORDER BY artworks.title ASC' : 'ORDER BY artworks.created_at DESC';
 
-            // Apply search filter
-            if (isset($_GET['search']) && !empty($_GET['search'])) {
-                $search = mysqli_real_escape_string($connect, $_GET['search']);
-                $query .= " AND (title LIKE '%$search%' OR content LIKE '%$search%')";
-            }
+$query = "
+    SELECT 
+        artworks.artwork_id,
+        artworks.title AS artwork_title,
+        artworks.image_url,
+        artworks.description,
+        artworks.created_at,
+        artists.preferred_display_name AS artist_name
+    FROM national_gallery.artworks AS artworks
+    LEFT JOIN national_gallery.artists AS artists
+        ON artworks.artist_id = artists.artist_id
+    $where_sql
+    $order_sql
+    LIMIT $per_page OFFSET $offset
+";
 
-            // Apply type filter
-            if (isset($_GET['type']) && !empty($_GET['type'])) {
-                $type = mysqli_real_escape_string($connect, $_GET['type']);
-                $query .= " AND type = '$type'";
-            }
+$result = mysqli_query($connect, $query);
 
-            // Apply sorting
-            $sort = isset($_GET['sort']) ? $_GET['sort'] : 'newest';
-            switch ($sort) {
-                case 'oldest':
-                    $query .= " ORDER BY date ASC";
-                    break;
-                case 'title_asc':
-                    $query .= " ORDER BY title ASC";
-                    break;
-                case 'title_desc':
-                    $query .= " ORDER BY title DESC";
-                    break;
-                default: // newest
-                    $query .= " ORDER BY date DESC";
-                    break;
-            }
+// Get total for pagination
+$count_query = "
+    SELECT COUNT(*) as total
+    FROM national_gallery.artworks AS artworks
+    LEFT JOIN national_gallery.artists AS artists
+        ON artworks.artist_id = artists.artist_id
+    $where_sql
+";
+$count_result = mysqli_query($connect, $count_query);
+$total_artworks = mysqli_fetch_assoc($count_result)['total'];
+$total_pages = ceil($total_artworks / $per_page);
 
-            // Pagination
-            $per_page = 9;
-            $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-            $offset = ($page - 1) * $per_page;
-            $query .= " LIMIT $offset, $per_page";
+// Fetch artists and media types for filter dropdowns
+$artists_list = mysqli_query($connect, "SELECT artist_id, preferred_display_name FROM national_gallery.artists ORDER BY preferred_display_name ASC");
+$media_types = ['image', 'video', 'audio'];
+?>
 
-            $result = mysqli_query($connect, $query);
+<main class="container py-5 mt-5 content-section">
+    <h1 class="mb-4 text-center">Explore the Collection</h1>
 
-            if (mysqli_num_rows($result) > 0) {
-                while ($record = mysqli_fetch_assoc($result)) {
-                    $title = htmlspecialchars($record['title']);
-                    $content = strip_tags(substr($record['content'], 0, 100)) . '...';
-                    $url = htmlspecialchars($record['url']);
-                    $type = htmlspecialchars($record['type']);
-                    $date = date('F Y', strtotime($record['date']));
-                    $project_id = htmlspecialchars($record['id']);
-                    
-                    // Handle photo if it exists in the database
-                    $image_url = 'https://via.placeholder.com/600x400?text=' . urlencode($title);
-                    if (!empty($record['photo'])) {
-                        $image_url = 'data:image/jpeg;base64,' . base64_encode($record['photo']);
-                    }
-                    ?>
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        <div class="project-card card h-100">
-                            <div class="project-image-container">
-                                <img src="<?= $image_url ?>" class="card-img-top" alt="<?= $title ?>" loading="lazy">
-                                <div class="project-overlay">
-                                    <span class="badge bg-primary"><?= $type ?></span>
-                                    <?php if (!empty($url)): ?>
-                                        <a href="<?= $url ?>" target="_blank" class="btn btn-light btn-sm mt-2">Visit Project</a>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <h5 class="card-title"><?= $title ?></h5>
-                                <p class="card-text text-muted"><?= $date ?></p>
-                                <p class="card-text"><?= $content ?></p>
-                            </div>
+    <!-- Filters & Search -->
+    <form method="get" class="row g-3 align-items-end mb-4">
+    <div class="col-md-4">
+        <input type="text" name="search" class="form-control" placeholder="Search artworks or artists..." value="<?= htmlspecialchars($search) ?>">
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Sort by</label>
+        <select name="sort" class="form-select">
+            <option value="newest" <?= $sort === 'newest' ? 'selected' : '' ?>>Newest</option>
+            <option value="az" <?= $sort === 'az' ? 'selected' : '' ?>>A–Z</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Artist</label>
+        <select name="artist" class="form-select">
+            <option value="">All Artists</option>
+            <?php mysqli_data_seek($artists_list, 0); ?>
+            <?php while ($artist = mysqli_fetch_assoc($artists_list)): ?>
+                <option value="<?= $artist['artist_id'] ?>" <?= $artist_filter == $artist['artist_id'] ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($artist['preferred_display_name']) ?>
+                </option>
+            <?php endwhile; ?>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Media Type</label>
+        <select name="media" class="form-select">
+            <option value="">All Types</option>
+            <?php foreach ($media_types as $type): ?>
+                <option value="<?= $type ?>" <?= $media_filter === $type ? 'selected' : '' ?>>
+                    <?= ucfirst($type) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+    <div class="col-md-2 d-flex gap-2">
+        <button type="submit" class="btn btn-primary w-100">Apply</button>
+        <a href="collection.php" class="btn btn-outline-secondary w-100">Clear</a>
+    </div>
+</form>
+
+
+    <!-- Artworks Grid -->
+    <div class="row g-4">
+        <?php if ($result && mysqli_num_rows($result) > 0): ?>
+            <?php while ($art = mysqli_fetch_assoc($result)): ?>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <?php if (!empty($art['image_url'])): ?>
+                            <img src="<?= htmlspecialchars($art['image_url']) ?>" class="card-img-top" alt="<?= htmlspecialchars($art['artwork_title']) ?>">
+                        <?php else: ?>
+                            <div class="bg-light p-5 text-muted text-center">No image</div>
+                        <?php endif; ?>
+                        <div class="card-body">
+                            <h5 class="card-title"><?= htmlspecialchars($art['artwork_title']) ?></h5>
+                            <p class="text-muted small"><?= htmlspecialchars($art['artist_name'] ?? 'Unknown') ?></p>
+                            <a href="artwork.php?id=<?= $art['artwork_id'] ?>" class="btn btn-sm btn-outline-primary">View Details</a>
                         </div>
                     </div>
-                    <?php
-                }
-            } else {
-                ?>
-                <div class="col-12 text-center py-5">
-                    <div class="alert alert-warning">No projects found matching your criteria.</div>
                 </div>
+            <?php endwhile; ?>
+        <?php else: ?>
+            <div class="col-12 text-center">
+                <div class="alert alert-info">No artworks match your filters.</div>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- Pagination -->
+    <?php if ($total_pages > 1): ?>
+    <nav class="mt-5">
+        <ul class="pagination justify-content-center">
+            <!-- Previous -->
+            <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
+                <a class="page-link" href="?<?= http_build_query(array_merge($_GET, ['page' => $page - 1])) ?>" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+
+            <?php
+            $range = 2; // how many pages around the current page to show
+            $ellipsis_shown = false;
+
+            for ($i = 1; $i <= $total_pages; $i++) {
+                if (
+                    $i == 1 || $i == $total_pages || 
+                    ($i >= $page - $range && $i <= $page + $range)
+                ) {
+                    $ellipsis_shown = false;
+                    ?>
+                    <li class="page-item <?= $i == $page ? 'active' : '' ?>">
+                        <a class="page-link" href="?<?= http_build_query(array_merge($_GET, ['page' => $i])) ?>"><?= $i ?></a>
+                    </li>
                 <?php
+                } elseif (!$ellipsis_shown) {
+                    $ellipsis_shown = true;
+                    ?>
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                <?php
+                }
             }
             ?>
-        </div>
 
-        <!-- Pagination -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <nav aria-label="Project pagination">
-                    <ul class="pagination justify-content-center">
-                        <?php
-                        // Count total projects for pagination
-                        $count_query = "SELECT COUNT(*) as total FROM projects WHERE 1=1";
-                        if (isset($_GET['search']) && !empty($_GET['search'])) {
-                            $count_query .= " AND (title LIKE '%$search%' OR content LIKE '%$search%')";
-                        }
-                        if (isset($_GET['type']) && !empty($_GET['type'])) {
-                            $count_query .= " AND type = '$type'";
-                        }
-                        
-                        $count_result = mysqli_query($connect, $count_query);
-                        $total_projects = mysqli_fetch_assoc($count_result)['total'];
-                        $total_pages = ceil($total_projects / $per_page);
+            <!-- Next -->
+            <li class="page-item <?= $page >= $total_pages ? 'disabled' : '' ?>">
+                <a class="page-link" href="?<?= http_build_query(array_merge($_GET, ['page' => $page + 1])) ?>" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+<?php endif; ?>
 
-                        // Previous button
-                        if ($page > 1) {
-                            echo '<li class="page-item"><a class="page-link" href="?'.http_build_query(array_merge($_GET, ['page' => $page - 1])).'">Previous</a></li>';
-                        }
+</main>
 
-                        // Page numbers
-                        for ($i = 1; $i <= $total_pages; $i++) {
-                            $active = $i == $page ? 'active' : '';
-                            echo '<li class="page-item '.$active.'"><a class="page-link" href="?'.http_build_query(array_merge($_GET, ['page' => $i])).'">'.$i.'</a></li>';
-                        }
-
-                        // Next button
-                        if ($page < $total_pages) {
-                            echo '<li class="page-item"><a class="page-link" href="?'.http_build_query(array_merge($_GET, ['page' => $page + 1])).'">Next</a></li>';
-                        }
-                        ?>
-                    </ul>
-                </nav>
-            </div>
-        </div>
-    </div>
-</section>
-
-<?php include '../includes/footer.php'; ?>
+<?php include('../includes/footer.php'); ?>
